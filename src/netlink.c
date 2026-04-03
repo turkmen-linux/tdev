@@ -11,6 +11,8 @@
 #include <sys/socket.h>
 #include <linux/netlink.h>
 
+#include "tdev.h"
+
 #define MAX_PAYLOAD 1024  /* maximum payload size*/
 struct sockaddr_nl src_addr, dest_addr;
 struct nlmsghdr *nlh = NULL;
@@ -18,9 +20,10 @@ struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
+handler_fn handler;
+
 int netlink_main() {
     int ret;
-    char *temp;
 
     printf("Creating socket\n");
     sock_fd=socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);
@@ -53,6 +56,10 @@ int netlink_main() {
     dest_addr.nl_groups = 0; /* unicast */
 
     nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
+    if(!nlh){
+        perror("malloc");
+        return -1;
+    }
     memset(nlh, 0, NLMSG_SPACE(MAX_PAYLOAD));
     nlh->nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
     nlh->nlmsg_flags = 0;
@@ -64,6 +71,7 @@ int netlink_main() {
     msg.msg_iovlen = 1;
     printf("Waiting for message from kernel\n");
     /* Read message from kernel */
+    char** arr = {NULL};
     while (1) {
         ssize_t len = recvmsg(sock_fd, &msg, 0);
         printf("====================\n");
@@ -76,10 +84,25 @@ int netlink_main() {
         char *end = payload + len;
         char *p = payload;
 
+        len = 0;
+
         while (p < end && *p) {
-            printf("%s\n", p);
+            len += 1;
+            char** tmp = realloc(arr, (len+1)*sizeof(char*));
+            if(tmp){
+                arr = tmp;
+            }
+            arr[len-1] = malloc(sizeof(char)*(strlen(p)+1));
+            strcpy(arr[len-1], p);
             size_t sl = strlen(p);
             p += sl + 1;
+        }
+        arr[len] = NULL;
+        if(handler && handler(arr)){
+            perror("handler");
+        }
+        for(size_t i=0; arr[i]; i++){
+            free(arr[i]);
         }
         printf("\n");
     }
