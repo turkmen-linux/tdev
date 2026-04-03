@@ -71,7 +71,6 @@ int netlink_main() {
     msg.msg_iovlen = 1;
     printf("Waiting for message from kernel\n");
     /* Read message from kernel */
-    char** arr = {NULL};
     while (1) {
         ssize_t len = recvmsg(sock_fd, &msg, 0);
         printf("====================\n");
@@ -86,23 +85,30 @@ int netlink_main() {
 
         len = 0;
 
+        //count len
         while (p < end && *p) {
-            len += 1;
-            char** tmp = realloc(arr, (len+1)*sizeof(char*));
-            if(tmp){
-                arr = tmp;
-            }
-            arr[len-1] = malloc(sizeof(char)*(strlen(p)+1));
-            strcpy(arr[len-1], p);
+            size_t sl = strlen(p);
+            p += sl + 1;
+            len++;
+        }
+
+        // create array then reset
+        char* arr[len] = {};
+        len = 0;
+        p = payload;
+
+        // fill array
+        while (p < end && *p) {
+            len++;
+            arr[len-1] = p;
             size_t sl = strlen(p);
             p += sl + 1;
         }
         arr[len] = NULL;
+
+        // run handler
         if(handler && handler(arr)){
             perror("handler");
-        }
-        for(size_t i=0; arr[i]; i++){
-            free(arr[i]);
         }
         printf("\n");
     }
