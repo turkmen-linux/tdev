@@ -20,9 +20,9 @@ struct iovec iov;
 int sock_fd;
 struct msghdr msg;
 
-handler_fn handler;
+handler_fn *handler;
 
-int netlink_main() {
+visible int netlink_main() {
     int ret;
 
     printf("Creating socket\n");
@@ -107,8 +107,12 @@ int netlink_main() {
         arr[len] = NULL;
 
         // run handler
-        if(handler && handler(arr)){
-            perror("handler");
+        if(handler){
+            for(size_t i=0; handler[i]; i++){
+                if(handler[i](arr)){
+                    perror("handler");
+                }
+            }
         }
         printf("\n");
     }
