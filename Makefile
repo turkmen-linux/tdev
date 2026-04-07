@@ -5,6 +5,7 @@ build:
 	CFLAGS="-g3 -O2" meson setup build $(ARGS) \
 	    --buildtype=debug \
 	    -Dplugindir=`pwd`/build \
+	    -Ddebug=true \
 	    && \
 	ninja -C build -v
 

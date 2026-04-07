@@ -20,12 +20,12 @@ endif
 
 
 # library
-libtdev = library('tdev', srcs)
+libtdev = library('tdev', srcs, link_args: ['-nostdlib', '-lc'])
 
 # plugins
 foreach src : run_command('find', 'plugins', '-type', 'f', '-iname', '*.c',check:true).stdout().strip().split('\n')
         name = src.replace('.c', '').split('/')[-1]
-        library('tdev_'+name, [src], link_with: libtdev)
+        library('tdev_'+name, [src], link_with: libtdev, link_args: ['-nostdlib', '-lc'])
 endforeach
 
 executable('tdev-cli', ['src/main.c'], link_with: libtdev)

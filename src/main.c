@@ -3,6 +3,9 @@
 
 #include "tdev.h"
 
-int main(int argc, char** argv){
-    return tdev_main(argc, argv);
+extern void tdev_main();
+
+int main(void){
+    tdev_main();
+    return 0;
 }

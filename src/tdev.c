@@ -17,7 +17,6 @@ static void load_plugins(){
         return;
     }
     struct dirent *e;
-    char plugin[PATH_MAX];
     while ((e = readdir(d)) != NULL) {
         if (strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0) {
             continue;
@@ -27,6 +26,7 @@ static void load_plugins(){
         if(strncmp("libtdev_", e->d_name, 8) != 0 || strncmp(ext, ".so", 3) != 0){
             continue;
         }
+        char plugin[PATH_MAX];
         strcpy(plugin, PLUGINDIR);
         strcat(plugin, "/");
         strcat(plugin, e->d_name);
@@ -35,8 +35,8 @@ static void load_plugins(){
     }
     closedir(d);
 }
-visible int tdev_main(int argc, char** argv){
+visible void tdev_main(){
     load_plugins();
     netlink_main();
-    return 0;
+    return;
 }

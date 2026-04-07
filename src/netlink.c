@@ -14,18 +14,18 @@
 #include "tdev.h"
 
 #define MAX_PAYLOAD 1024  /* maximum payload size*/
-struct sockaddr_nl src_addr, dest_addr;
-struct nlmsghdr *nlh = NULL;
-struct iovec iov;
-int sock_fd;
-struct msghdr msg;
+static struct sockaddr_nl src_addr, dest_addr;
+static struct nlmsghdr *nlh = NULL;
+static struct iovec iov;
+static int sock_fd;
+static struct msghdr msg;
 
 handler_fn *handler;
 
-visible int netlink_main() {
+int netlink_main() {
     int ret;
 
-    printf("Creating socket\n");
+    debug("Creating socket\n");
     sock_fd=socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);
     if(sock_fd<0) {
         printf("Socket creating failed\n");
@@ -69,11 +69,10 @@ visible int netlink_main() {
     msg.msg_namelen = sizeof(dest_addr);
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
-    printf("Waiting for message from kernel\n");
+    debug("Waiting for message from kernel\n");
     /* Read message from kernel */
     while (1) {
         ssize_t len = recvmsg(sock_fd, &msg, 0);
-        printf("====================\n");
         if (len < 0) {
             perror("recvmsg");
             break;
@@ -114,7 +113,6 @@ visible int netlink_main() {
                 }
             }
         }
-        printf("\n");
     }
     close(sock_fd);
     return 0;
