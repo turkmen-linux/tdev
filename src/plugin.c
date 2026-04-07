@@ -7,8 +7,8 @@
 #include "tdev.h"
 
 extern handler_fn *handler;
-static size_t total = 0;
-static size_t cur = 0;
+static int total = 0;
+static int cur = 0;
 
 visible void register_handler(handler_fn h){
     // init if required
@@ -21,7 +21,7 @@ visible void register_handler(handler_fn h){
         }
     }
     // reallocate if required
-    if (cur >= total){
+    if (total <= cur){
         total += 32;
         handler_fn* tmp = realloc(handler, total*sizeof(handler_fn));
         if(tmp){

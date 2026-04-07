@@ -79,7 +79,7 @@ int netlink_main() {
         }
 
         char *payload = NLMSG_DATA(nlh);
-        char *end = payload + len;
+        const char *end = payload + len;
         char *p = payload;
 
         len = 0;

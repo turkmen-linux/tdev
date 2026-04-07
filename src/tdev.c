@@ -16,12 +16,12 @@ static void load_plugins(){
         perror("opendir");
         return;
     }
-    struct dirent *e;
+    const struct dirent *e;
     while ((e = readdir(d)) != NULL) {
         if (strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0) {
             continue;
         }
-        char* ext = (e->d_name+strlen(e->d_name)-3);
+        const char* ext = (e->d_name+strlen(e->d_name)-3);
         // load only libtdev_xxx.so
         if(strncmp("libtdev_", e->d_name, 8) != 0 || strncmp(ext, ".so", 3) != 0){
             continue;
