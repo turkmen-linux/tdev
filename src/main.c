@@ -5,7 +5,7 @@
 
 extern void tdev_main();
 
-int main(void){
+int main(void) {
     tdev_main();
     return 0;
 }

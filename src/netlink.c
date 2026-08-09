@@ -1,19 +1,16 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <linux/netlink.h>
-#include <unistd.h>
 #include <errno.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <linux/netlink.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "tdev.h"
+#include <linux/netlink.h>
+#include <sys/socket.h>
+#include <sys/time.h>
 
-#define MAX_PAYLOAD 1024  /* maximum payload size*/
+#define MAX_PAYLOAD 1024 /* maximum payload size*/
 static struct sockaddr_nl src_addr, dest_addr;
 static struct nlmsghdr *nlh = NULL;
 static struct iovec iov;
@@ -26,18 +23,18 @@ int netlink_main() {
     int ret;
 
     debug("Creating socket\n");
-    sock_fd=socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);
-    if(sock_fd<0) {
+    sock_fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);
+    if (sock_fd < 0) {
         printf("Socket creating failed\n");
         return -1;
     }
 
     memset(&src_addr, 0, sizeof(src_addr));
     src_addr.nl_family = AF_NETLINK;
-    src_addr.nl_pid = getpid();  /* self pid */
+    src_addr.nl_pid = getpid(); /* self pid */
     src_addr.nl_groups = 1;
     /* interested in group 1<<0 */
-    ret = bind(sock_fd, (struct sockaddr*)&src_addr,
+    ret = bind(sock_fd, (struct sockaddr *) &src_addr,
                sizeof(src_addr));
     if (ret < 0) {
         printf("Bind Failed\n");
@@ -47,20 +44,20 @@ int netlink_main() {
 
     memset(&dest_addr, 0, sizeof(dest_addr));
     dest_addr.nl_family = AF_NETLINK;
-    dest_addr.nl_pid = 0;   /* For Linux Kernel */
+    dest_addr.nl_pid = 0;    /* For Linux Kernel */
     dest_addr.nl_groups = 0; /* unicast */
 
-    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
-    if(!nlh){
+    nlh = (struct nlmsghdr *) malloc(NLMSG_SPACE(MAX_PAYLOAD));
+    if (!nlh) {
         perror("malloc");
         return -1;
     }
     memset(nlh, 0, NLMSG_SPACE(MAX_PAYLOAD));
     nlh->nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
     nlh->nlmsg_flags = 0;
-    iov.iov_base = (void *)nlh;
+    iov.iov_base = (void *) nlh;
     iov.iov_len = nlh->nlmsg_len;
-    msg.msg_name = (void *)&dest_addr;
+    msg.msg_name = (void *) &dest_addr;
     msg.msg_namelen = sizeof(dest_addr);
     msg.msg_iov = &iov;
     msg.msg_iovlen = 1;
@@ -79,7 +76,7 @@ int netlink_main() {
 
         len = 0;
 
-        //count len
+        // count len
         while (p < end && *p) {
             size_t sl = strlen(p);
             p += sl + 1;
@@ -87,23 +84,23 @@ int netlink_main() {
         }
 
         // create array then reset
-        char* arr[len] = {};
+        char *arr[len] = {};
         len = 0;
         p = payload;
 
         // fill array
         while (p < end && *p) {
             len++;
-            arr[len-1] = p;
+            arr[len - 1] = p;
             size_t sl = strlen(p);
             p += sl + 1;
         }
         arr[len] = NULL;
 
         // run handler
-        if(handler){
-            for(size_t i=0; handler[i]; i++){
-                if(handler[i](arr)){
+        if (handler) {
+            for (size_t i = 0; handler[i]; i++) {
+                if (handler[i](arr)) {
                     perror("handler");
                 }
             }
