@@ -33,6 +33,7 @@ visible void register_handler(handler_fn h){
     }
     debug("Register handler: %p\n", &h);
     handler[cur] = h;
+    cur++;
 }
 
 void load_plugin(const char* path){

@@ -50,11 +50,6 @@ int netlink_main() {
     dest_addr.nl_pid = 0;   /* For Linux Kernel */
     dest_addr.nl_groups = 0; /* unicast */
 
-    memset(&dest_addr, 0, sizeof(dest_addr));
-    dest_addr.nl_family = AF_NETLINK;
-    dest_addr.nl_pid = 0;   /* For Linux Kernel */
-    dest_addr.nl_groups = 0; /* unicast */
-
     nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
     if(!nlh){
         perror("malloc");
